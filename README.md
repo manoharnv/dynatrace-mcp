@@ -18,12 +18,28 @@
   </a>
 </h4>
 
-This local MCP server allows interaction with the [Dynatrace](https://www.dynatrace.com/) observability platform.
-Bring real-time observability data directly into your development workflow.
+The local _Dynatrace MCP server_ allows AI Assistants to interact with the [Dynatrace](https://www.dynatrace.com/) observability platform,
+bringing real-time observability data directly into your development workflow.
 
 > Note: This product is not officially supported by Dynatrace.
 
-Please contact us via [GitHub Issues](https://github.com/dynatrace-oss/dynatrace-mcp/issues) if you have feature requests, questions, or need help.
+If you need help, please contact us via [GitHub Issues](https://github.com/dynatrace-oss/dynatrace-mcp/issues) if you have feature requests, questions, or need help.
+
+## Quickstart
+
+You can add this MCP server to your MCP Client like VSCode, Claude, Cursor, Amazon Q, Windsurf, ChatGPT, or Github Copilot via the npmjs package `@dynatrace-oss/dynatrace-mcp-server`, and type `stdio`.
+You can find more details about the configuration for different AI Assistants, Agents and MCP Clients in the [Configuration section below](#configuration).
+
+Furthermore, you need your Dynatrace environment URL, e.g., `https://abc12345.apps.dynatrace.com`, as well as a [Platform Token](https://docs.dynatrace.com/docs/manage/identity-access-management/access-tokens-and-oauth-clients/platform-tokens), e.g., `dt0s16.SAMPLE.abcd1234`, with [required scopes](#scopes-for-authentication).
+
+Depending on your MCP Client, you need to configure these as environment variables or as settings in the UI:
+
+- `DT_ENVIRONMENT` (string, e.g., `https://abc12345.apps.dynatrace.com`) - URL to your Dynatrace Platform (do not use Dynatrace classic URLs like `abc12345.live.dynatrace.com`)
+- `DT_PLATFORM_TOKEN` (string, e.g., `dt0s16.SAMPLE.abcd1234`) - **Recommended**: Dynatrace Platform Token
+
+Once you are done, we recommend looking into [example prompts](#-example-prompts-), like `Get all details of the entity 'my-service'` or `Show me error logs`. Please mind that these prompts lead to executing DQL statements which may incur [costs](#costs) in accordance to your licence.
+
+## Architecture
 
 ![Architecture](https://github.com/dynatrace-oss/dynatrace-mcp/blob/main/assets/dynatrace-mcp-arch.png?raw=true)
 
@@ -184,7 +200,7 @@ rules/
 
 For detailed information about the workshop rules, see the [Rules README](./dynatrace-agent-rules/rules/README.md).
 
-## Quickstart
+## Configuration
 
 You can add this MCP server (using STDIO) to your MCP Client like VS Code, Claude, Cursor, Amazon Q Developer CLI, Windsurf Github Copilot via the package `@dynatrace-oss/dynatrace-mcp-server`.
 
@@ -328,11 +344,11 @@ For fetching just error-logs, add `| filter loglevel == "ERROR"`.
 
 You can set up authentication via **Platform Tokens** (recommended) or **OAuth Client** via the following environment variables:
 
-- `DT_ENVIRONMENT` (string, e.g., https://abc12345.apps.dynatrace.com) - URL to your Dynatrace Platform (do not use Dynatrace classic URLs like `abc12345.live.dynatrace.com`)
+- `DT_ENVIRONMENT` (string, e.g., `https://abc12345.apps.dynatrace.com`) - URL to your Dynatrace Platform (do not use Dynatrace classic URLs like `abc12345.live.dynatrace.com`)
 - `DT_PLATFORM_TOKEN` (string, e.g., `dt0s16.SAMPLE.abcd1234`) - **Recommended**: Dynatrace Platform Token
 - `OAUTH_CLIENT_ID` (string, e.g., `dt0s02.SAMPLE`) - Alternative: Dynatrace OAuth Client ID (for advanced use cases)
 - `OAUTH_CLIENT_SECRET` (string, e.g., `dt0s02.SAMPLE.abcd1234`) - Alternative: Dynatrace OAuth Client Secret (for advanced use cases)
-- `DT_GRAIL_QUERY_BUDGET_GB` (number, default: 1000) - Budget limit in GB (base 1000) for Grail query bytes scanned per session. The MCP server tracks your Grail usage and warns when approaching or exceeding this limit.
+- `DT_GRAIL_QUERY_BUDGET_GB` (number, default: `1000`) - Budget limit in GB (base 1000) for Grail query bytes scanned per session. The MCP server tracks your Grail usage and warns when approaching or exceeding this limit.
 
 **Platform Tokens are recommended** for most use cases as they provide a simpler authentication flow. OAuth Clients should only be used when specific OAuth features are required.
 
@@ -383,6 +399,18 @@ Use these example prompts as a starting point. Just copy them into your IDE or a
 and extend them as needed. They're here to help you imagine how real-time observability and automation work together in the MCP context in your IDE.
 
 ### **Basic Queries & AI Assistance**
+
+**Find a monitored entity**
+
+```
+Get all details of the entity 'my-service'
+```
+
+**Find error logs**
+
+```
+Show me error logs
+```
 
 **Write a DQL query from natural language:**
 
@@ -608,51 +636,3 @@ To disable usage tracking, add this to your environment:
 ```bash
 DT_MCP_DISABLE_TELEMETRY=true
 ```
-
-## Development
-
-For local development purposes, you can use VSCode and GitHub Copilot.
-
-First, enable Copilot for your Workspace `.vscode/settings.json`:
-
-```json
-{
-  "github.copilot.enable": {
-    "*": true
-  }
-}
-```
-
-and make sure that you are using Agent Mode in Copilot.
-
-Second, add the MCP to `.vscode/mcp.json`:
-
-```json
-{
-  "servers": {
-    "my-dynatrace-mcp-server": {
-      "command": "node",
-      "args": ["--watch", "${workspaceFolder}/dist/index.js"],
-      "envFile": "${workspaceFolder}/.env"
-    }
-  }
-}
-```
-
-Third, create a `.env` file in this repository (you can copy from `.env.template`) and configure environment variables as [described above](#environment-variables).
-
-Finally, make changes to your code and compile it with `npm run build` or just run `npm run watch` and it auto-compiles.
-
-## Releasing
-
-When you are preparing for a release, you can use GitHub Copilot to guide you through the preparations.
-
-In Visual Studio Code, you can use `/release` in the chat with Copilot in Agent Mode, which will execute [release.prompt.md](.github/prompts/release.prompt.md).
-
-You may include additional information such as the version number. If not specified, you will be asked.
-
-This will
-
-- prepare the [changelog](CHANGELOG.md),
-- update the version number in [package.json](package.json),
-- commit the changes.
