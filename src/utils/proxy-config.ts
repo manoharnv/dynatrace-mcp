@@ -17,8 +17,7 @@ export function configureProxyFromEnvironment(): void {
   const proxyUrl = httpsProxy || httpProxy;
 
   if (!proxyUrl) {
-    // No proxy configured, use default dispatcher
-    console.error('No proxy configuration found in environment variables.');
+    // No proxy configured, nothing to do
     return;
   }
 
@@ -37,10 +36,14 @@ export function configureProxyFromEnvironment(): void {
     }
 
     // Create ProxyAgent with the configured proxy URL
+    // Note: undici's ProxyAgent doesn't have built-in no_proxy support.
+    // The no_proxy environment variable is logged for informational purposes,
+    // but the ProxyAgent will route all requests through the proxy.
+    // If no_proxy support is critical for your use case, you may need to:
+    // 1. Implement a custom dispatcher that checks shouldBypassProxy()
+    // 2. Configure your proxy server to handle no_proxy exclusions
     const proxyAgent = new ProxyAgent({
       uri: proxyUrl,
-      // Note: undici's ProxyAgent doesn't have built-in no_proxy support
-      // For production use, you might need to implement custom logic or use a wrapper
     });
 
     // Set the global dispatcher for undici (affects global fetch)
