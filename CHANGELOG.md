@@ -17,6 +17,11 @@
 
 - Fixed an issue where disabling telemetry with `DT_MCP_DISABLE_TELEMETRY=true` would show a stack trace instead of a concise message.
 
+### Proxy Support
+
+- Added support for system proxy configuration via environment variables (`https_proxy`, `HTTPS_PROXY`, `http_proxy`, `HTTP_PROXY`, `no_proxy`, `NO_PROXY`)
+- The MCP server now honors corporate proxy settings for all HTTP requests to Dynatrace environments
+
 ## 0.9.2
 
 - Improved error handling when initializing the connection for the first time
