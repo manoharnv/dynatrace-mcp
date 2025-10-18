@@ -39,9 +39,8 @@ export function configureProxyFromEnvironment(): void {
     // Note: undici's ProxyAgent doesn't have built-in no_proxy support.
     // The no_proxy environment variable is logged for informational purposes,
     // but the ProxyAgent will route all requests through the proxy.
-    // If no_proxy support is critical for your use case, you may need to:
-    // 1. Implement a custom dispatcher that checks shouldBypassProxy()
-    // 2. Configure your proxy server to handle no_proxy exclusions
+    // If no_proxy support is critical for your use case, you may need to
+    // configure your proxy server to handle no_proxy exclusions.
     const proxyAgent = new ProxyAgent({
       uri: proxyUrl,
     });
@@ -54,53 +53,4 @@ export function configureProxyFromEnvironment(): void {
     console.error(`⚠️ Failed to configure proxy: ${error instanceof Error ? error.message : String(error)}`);
     console.error('Continuing without proxy configuration.');
   }
-}
-
-/**
- * Check if a hostname should bypass the proxy based on no_proxy environment variable.
- * This is a helper function for manual proxy bypass checks if needed.
- *
- * @param hostname - The hostname to check
- * @returns true if the hostname should bypass the proxy
- */
-export function shouldBypassProxy(hostname: string): boolean {
-  const noProxy = process.env.no_proxy || process.env.NO_PROXY;
-
-  if (!noProxy) {
-    return false;
-  }
-
-  const noProxyHosts = noProxy
-    .split(',')
-    .map((host) => host.trim())
-    .filter((host) => host.length > 0);
-
-  for (const pattern of noProxyHosts) {
-    // Handle wildcard patterns
-    if (pattern === '*') {
-      return true;
-    }
-
-    // Handle domain patterns (e.g., .example.com matches *.example.com)
-    if (pattern.startsWith('.')) {
-      if (hostname.endsWith(pattern) || hostname === pattern.substring(1)) {
-        return true;
-      }
-    }
-
-    // Exact match
-    if (hostname === pattern) {
-      return true;
-    }
-
-    // Handle subdomain wildcards (e.g., *.example.com)
-    if (pattern.startsWith('*.')) {
-      const domain = pattern.substring(2);
-      if (hostname.endsWith('.' + domain) || hostname === domain) {
-        return true;
-      }
-    }
-  }
-
-  return false;
 }

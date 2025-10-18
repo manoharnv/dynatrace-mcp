@@ -22,6 +22,10 @@
 - Added support for system proxy configuration via environment variables (`https_proxy`, `HTTPS_PROXY`, `http_proxy`, `HTTP_PROXY`, `no_proxy`, `NO_PROXY`)
 - The MCP server now honors corporate proxy settings for all HTTP requests to Dynatrace environments
 
+### Other Changes
+
+- Removed unused `shouldBypassProxy` function from proxy configuration utilities
+
 ## 0.9.2
 
 - Improved error handling when initializing the connection for the first time
