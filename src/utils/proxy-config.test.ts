@@ -1,4 +1,4 @@
-import { configureProxyFromEnvironment, shouldBypassProxy } from './proxy-config';
+import { configureProxyFromEnvironment } from './proxy-config';
 
 // Mock undici
 jest.mock('undici', () => ({
@@ -98,67 +98,6 @@ describe('proxy-config', () => {
       expect(ProxyAgent).toHaveBeenCalled();
       // Should not set dispatcher if ProxyAgent creation fails
       expect(setGlobalDispatcher).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('shouldBypassProxy', () => {
-    it('should return false when no_proxy is not set', () => {
-      expect(shouldBypassProxy('example.com')).toBe(false);
-      expect(shouldBypassProxy('localhost')).toBe(false);
-    });
-
-    it('should return true for exact match', () => {
-      process.env.no_proxy = 'localhost,example.com';
-
-      expect(shouldBypassProxy('localhost')).toBe(true);
-      expect(shouldBypassProxy('example.com')).toBe(true);
-    });
-
-    it('should return true for wildcard (*)', () => {
-      process.env.no_proxy = '*';
-
-      expect(shouldBypassProxy('any-host.com')).toBe(true);
-      expect(shouldBypassProxy('localhost')).toBe(true);
-    });
-
-    it('should handle domain patterns (starting with .)', () => {
-      process.env.no_proxy = '.example.com';
-
-      expect(shouldBypassProxy('sub.example.com')).toBe(true);
-      expect(shouldBypassProxy('example.com')).toBe(true);
-      expect(shouldBypassProxy('other.com')).toBe(false);
-    });
-
-    it('should handle wildcard subdomain patterns (*.domain)', () => {
-      process.env.no_proxy = '*.example.com';
-
-      expect(shouldBypassProxy('sub.example.com')).toBe(true);
-      expect(shouldBypassProxy('example.com')).toBe(true);
-      expect(shouldBypassProxy('other.com')).toBe(false);
-    });
-
-    it('should handle multiple patterns', () => {
-      process.env.no_proxy = 'localhost,127.0.0.1,.local,*.internal.com';
-
-      expect(shouldBypassProxy('localhost')).toBe(true);
-      expect(shouldBypassProxy('127.0.0.1')).toBe(true);
-      expect(shouldBypassProxy('service.local')).toBe(true);
-      expect(shouldBypassProxy('api.internal.com')).toBe(true);
-      expect(shouldBypassProxy('example.com')).toBe(false);
-    });
-
-    it('should handle patterns with spaces', () => {
-      process.env.no_proxy = 'localhost, 127.0.0.1 , .local';
-
-      expect(shouldBypassProxy('localhost')).toBe(true);
-      expect(shouldBypassProxy('127.0.0.1')).toBe(true);
-      expect(shouldBypassProxy('service.local')).toBe(true);
-    });
-
-    it('should use NO_PROXY (uppercase) if no_proxy is not set', () => {
-      process.env.NO_PROXY = 'localhost';
-
-      expect(shouldBypassProxy('localhost')).toBe(true);
     });
   });
 });
